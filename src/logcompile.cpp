@@ -90,6 +90,7 @@ static void WriteLSMSWord(short word)
 }
 
 //*************************************************
+#ifndef COMPILE_TO_LUA
 void Logic::ShowError(int Line, std::string ErrorMsg)
 {
     int LineNum = RealLineNum[Line];
@@ -106,6 +107,7 @@ void Logic::ShowError(int Line, std::string ErrorMsg)
     ErrorList.append(tmp);
     ErrorOccured = true;
 }
+#endif
 
 //***************************************************
 std::string Logic::ReadString(std::string::size_type *pos, std::string &str)
@@ -483,6 +485,7 @@ int Logic::ReadLabels()
 }
 
 //***************************************************
+#ifndef COMPILE_TO_LUA
 void Logic::NextLine()
 {
     int NumLines = EditLines.count();
@@ -504,6 +507,7 @@ void Logic::NextLine()
     } while (CurLine < NumLines);
     FinishedReading = true;
 }
+#endif
 
 //***************************************************
 void Logic::SkipSpaces()
@@ -541,7 +545,7 @@ byte Logic::AddMessage(std::string TheMessage)
 }
 
 //***************************************************
-static std::string TrimEndWhitespaces(const std::string &str)
+std::string Logic::TrimEndWhitespaces(const std::string &str)
 {
     int i = str.length();
     while (i > 0 && (str[i - 1] == ' ' || str[i - 1] == '\t'))
@@ -694,36 +698,51 @@ void Logic::ReadArgs(bool CommandIsIf, byte CmdNum)
         if (CommandIsIf)
             ThisCommand = TestCommand[CmdNum];
         else
-            ThisCommand = AGICommand[CmdNum];
+            ThisCommand = AGICommand[CmdNum];        
         for (CurArg = 0; CurArg < ThisCommand.NumArgs; CurArg++) {
             SkipSpaces();
             ReadArgText();
             if (ThisCommand.argTypes[CurArg] == atMsg && ArgTextLength >= 1 && ArgText[0] == '"') {
-                // argument is message and given as string
-                ArgTextPos = 0;
-                ThisMessage = "";
-                //splitting the message into lines if it doesn't fit the screen
-                do {
-                    if (ThisMessage != "" && ThisMessage[ThisMessage.length() - 1] != ' ')
-                        ThisMessage += " ";
-                    ThisMessage += ReadString(&ArgTextPos, ArgText);
-                    if (LinePos + 1 >= LineLength || LowerCaseLine.find_first_not_of(" ", LinePos + 1) == std::string::npos) {
+                // argument is message and given as string        
+                bool isCustomCommand = (strcmp(ThisCommand.Name, "update.context") == 0);
 
-                        NextLine();
-                        SkipSpaces();
-                        ReadArgText();
-                    } else
-                        break;
-                } while (true);
-                ThisMessageNum = MessageNum(ThisMessage);
-                if (ThisMessageNum > 0)
-                    WriteByte(ThisMessageNum);
+                if (isCustomCommand) {
+                    ArgTextPos = 0;
+                    ThisMessage = ReadString(&ArgTextPos, ArgText);
+                    
+                    WriteByte(0xFE); // special byte to indicate custom string
+                    
+                    WriteByte(ThisMessage.length());
+                    for (char c : ThisMessage) {
+                        WriteByte(static_cast<byte>(c));
+                    }
+                }
                 else {
-                    ThisMessageNum = AddMessage(ThisMessage);
-                    if (ThisMessageNum == 0)
-                        ShowError(CurLine, "Too many messages (max 255).");
-                    else
+                    ArgTextPos = 0;
+                    ThisMessage = "";
+                    //splitting the message into lines if it doesn't fit the screen
+                    do {
+                        if (ThisMessage != "" && ThisMessage[ThisMessage.length() - 1] != ' ')
+                            ThisMessage += " ";
+                        ThisMessage += ReadString(&ArgTextPos, ArgText);
+                        if (LinePos + 1 >= LineLength || LowerCaseLine.find_first_not_of(" ", LinePos + 1) == std::string::npos) {
+                            
+                            NextLine();
+                            SkipSpaces();
+                            ReadArgText();
+                        } else
+                            break;
+                    } while (true);
+                    ThisMessageNum = MessageNum(ThisMessage);
+                    if (ThisMessageNum > 0)
                         WriteByte(ThisMessageNum);
+                    else {
+                        ThisMessageNum = AddMessage(ThisMessage);
+                        if (ThisMessageNum == 0)
+                            ShowError(CurLine, "Too many messages (max 255).");
+                        else
+                            WriteByte(ThisMessageNum);
+                    }
                 }
             }//argument is message and given as string
             else if (ThisCommand.argTypes[CurArg] == atIObj && ArgTextLength >= 1 && ArgText[0] == '"') {
@@ -830,12 +849,14 @@ std::string Logic::ReadExprText()
 }
 
 //***************************************************
+#ifndef COMPILE_TO_LUA
 void Logic::ReadCommandName()
 {
     SkipSpaces();
     CommandNameStartPos = LinePos;
     CommandName = ReadText();
 }
+#endif
 
 //***************************************************
 byte Logic::FindCommandNum(bool CommandIsIf, std::string CmdName)
@@ -1482,6 +1503,7 @@ int Logic::CompileCommands()
 }
 
 //***************************************************
+#ifndef COMPILE_TO_LUA
 int Logic::compile()
 {
     int ret, i, j;
@@ -1547,3 +1569,4 @@ int Logic::compile()
     ResourceData.Size = LogicSize;
     return 0;
 }
+#endif

@@ -29,6 +29,7 @@ set(AGIStudio_HEADERS
     wordsedit.h
     wutil.h
     bmp2agipic.h
+    compilerConfig.h
 )
 
 set(AGIStudio_SOURCES
@@ -58,6 +59,7 @@ set(AGIStudio_SOURCES
     wordsedit.cpp
     wutil.cpp
     bmp2agipic.cpp
+    luaCompile.cpp
 )
 
 # Load Resource definitions

@@ -51,7 +51,7 @@ CommandStruct TestCommand[19] = {
 };
 
 
-CommandStruct AGICommand[182] = {
+CommandStruct AGICommand[NumTotalAGICommands] = {
 
     { "return",  0, { 0, 0, 0, 0, 0, 0, 0 } },
     { "increment",  1, { atVar, 0, 0, 0, 0, 0, 0 } },
@@ -236,7 +236,12 @@ CommandStruct AGICommand[182] = {
     { "show.mouse", 0, {0, 0, 0, 0, 0, 0, 0 } }, // unknown 178
     { "fence.mouse", 4, {0, 0, 0, 0, 0, 0, 0 } }, // unknown 179
     { "mouse.posn", 2, {0, 0, 0, 0, 0, 0, 0 } }, // unknown 180
-    { "release.key", 0, {0, 0, 0, 0, 0, 0, 0 } } // unknown 181
+    { "release.key", 0, {0, 0, 0, 0, 0, 0, 0 } }, // unknown 181
+
+#ifdef COMPILE_TO_LUA
+// New custom commands
+    { "update.context",  1, { atMsg, 0, 0, 0, 0, 0, 0 } }
+#endif
 };
 
 
@@ -267,4 +272,9 @@ void CorrectCommands(long VerNum)
         NumAGICommands = 177;
     else
         NumAGICommands = 181;
+
+    #ifdef COMPILE_TO_LUA
+    // ++NumAGICommands; // new update.context command
+    NumAGICommands = 182;
+    #endif
 }

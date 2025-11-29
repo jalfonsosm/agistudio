@@ -577,6 +577,10 @@ void Logic::ReadIfs(void)
 //***************************************************
 int Logic::decode(int ResNum)
 {
+    #ifdef COMPILE_TO_LUA    
+    resNum = ResNum;
+    #endif
+    
     int ret = 0, i, j;
 
     OutputText = "";

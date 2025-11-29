@@ -1,0 +1,6 @@
+#ifndef COMPILERCONFIG_H
+#define COMPILERCONFIG_H
+
+// #define COMPILE_TO_LUA  
+
+#endif // COMPILERCONFIG_H

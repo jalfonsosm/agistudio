@@ -24,6 +24,7 @@
 
 #include <string>
 
+#include "compilerConfig.h"
 #include "words.h"
 #include "object.h"
 #include "agicommands.h"
@@ -71,6 +72,7 @@ private:
     void SkipSpaces();
     byte MessageNum(std::string TheMessage);
     byte AddMessage(std::string TheMessage);
+    static std::string TrimEndWhitespaces(const std::string &str);
     std::string ReplaceDefine(std::string InText);
     void ReadArgText();
     int ReadArgValue();
@@ -87,6 +89,21 @@ private:
     bool LabelAtStartOfLine(std::string LabelName);
     void WriteMessageSection();
     int CompileCommands();
+
+#ifdef COMPILE_TO_LUA    
+public:
+    int resNum = -1;
+    int compileToLua();
+    QStringList GetGeneratedLuaCode();
+    
+private:
+    void CompileCommandToLua();
+    std::string CompileConditionToLua();
+    void ReadArgsToLua(bool isTest, byte cmdNum, std::vector<std::string>& args);
+    void ReadArgTextLua();
+    void SkipSpacesLua();
+    std::string ConvertArgToLua(int type, const std::string& arg);
+#endif
 };
 
 #endif

@@ -21,6 +21,8 @@
 #ifndef AGI_COMMANDS_H
 #define AGI_COMMANDS_H
 
+#include "compilerConfig.h"
+
 //argument types
 #define atNum  0
 #define atVar  1
@@ -45,7 +47,14 @@ typedef struct {
 extern int NumAGICommands;   //changes in different AGI interpreter versions
 
 extern CommandStruct TestCommand[19];  //tests for different flags, etc
-extern CommandStruct AGICommand[182];  //all the other
+
+#ifdef COMPILE_TO_LUA
+#define NumTotalAGICommands 183
+#else
+#define NumTotalAGICommands 182
+#endif
+
+extern CommandStruct AGICommand[NumTotalAGICommands];  //all the other
 
 
 extern void  CorrectCommands(long VerNum);
