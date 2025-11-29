@@ -703,46 +703,38 @@ void Logic::ReadArgs(bool CommandIsIf, byte CmdNum)
             SkipSpaces();
             ReadArgText();
             if (ThisCommand.argTypes[CurArg] == atMsg && ArgTextLength >= 1 && ArgText[0] == '"') {
-                // argument is message and given as string        
+                // argument is message and given as string  
+                ArgTextPos = 0;
+                ThisMessage = "";
                 bool isCustomCommand = (strcmp(ThisCommand.Name, "update.context") == 0);
-
+        
                 if (isCustomCommand) {
-                    ArgTextPos = 0;
                     ThisMessage = ReadString(&ArgTextPos, ArgText);
-                    
-                    WriteByte(0xFE); // special byte to indicate custom string
-                    
-                    WriteByte(ThisMessage.length());
-                    for (char c : ThisMessage) {
-                        WriteByte(static_cast<byte>(c));
-                    }
-                }
-                else {
-                    ArgTextPos = 0;
-                    ThisMessage = "";
+                } else {
                     //splitting the message into lines if it doesn't fit the screen
                     do {
                         if (ThisMessage != "" && ThisMessage[ThisMessage.length() - 1] != ' ')
-                            ThisMessage += " ";
+                           ThisMessage += " ";
                         ThisMessage += ReadString(&ArgTextPos, ArgText);
                         if (LinePos + 1 >= LineLength || LowerCaseLine.find_first_not_of(" ", LinePos + 1) == std::string::npos) {
-                            
+
                             NextLine();
                             SkipSpaces();
                             ReadArgText();
                         } else
                             break;
-                    } while (true);
-                    ThisMessageNum = MessageNum(ThisMessage);
-                    if (ThisMessageNum > 0)
+                    } while (true);  
+                }
+
+                ThisMessageNum = MessageNum(ThisMessage);
+                if (ThisMessageNum > 0)
+                    WriteByte(ThisMessageNum);
+                else {
+                    ThisMessageNum = AddMessage(ThisMessage);
+                    if (ThisMessageNum == 0)
+                        ShowError(CurLine, "Too many messages (max 255).");
+                    else
                         WriteByte(ThisMessageNum);
-                    else {
-                        ThisMessageNum = AddMessage(ThisMessage);
-                        if (ThisMessageNum == 0)
-                            ShowError(CurLine, "Too many messages (max 255).");
-                        else
-                            WriteByte(ThisMessageNum);
-                    }
                 }
             }//argument is message and given as string
             else if (ThisCommand.argTypes[CurArg] == atIObj && ArgTextLength >= 1 && ArgText[0] == '"') {
