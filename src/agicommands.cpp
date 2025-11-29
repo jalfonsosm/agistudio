@@ -238,10 +238,8 @@ CommandStruct AGICommand[NumTotalAGICommands] = {
     { "mouse.posn", 2, {0, 0, 0, 0, 0, 0, 0 } }, // unknown 180
     { "release.key", 0, {0, 0, 0, 0, 0, 0, 0 } }, // unknown 181
 
-#ifdef COMPILE_TO_LUA
 // New custom commands
     { "update.context",  1, { atMsg, 0, 0, 0, 0, 0, 0 } }
-#endif
 };
 
 
@@ -249,6 +247,7 @@ int NumAGICommands  = 181; // not counting return()
 
 void CorrectCommands(long VerNum)
 {
+    /*
     if (VerNum <= 2089000) {
         AGICommand[134].NumArgs = 0;  //quit
     }
@@ -272,9 +271,10 @@ void CorrectCommands(long VerNum)
         NumAGICommands = 177;
     else
         NumAGICommands = 181;
-
-    #ifdef COMPILE_TO_LUA
+    */
+    
+//    #ifdef COMPILE_TO_LUA
     // ++NumAGICommands; // new update.context command
     NumAGICommands = 182;
-    #endif
+//    #endif
 }

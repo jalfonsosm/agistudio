@@ -48,11 +48,11 @@ extern int NumAGICommands;   //changes in different AGI interpreter versions
 
 extern CommandStruct TestCommand[19];  //tests for different flags, etc
 
-#ifdef COMPILE_TO_LUA
+// #ifdef COMPILE_TO_LUA
 #define NumTotalAGICommands 183
-#else
-#define NumTotalAGICommands 182
-#endif
+// #else
+// #define NumTotalAGICommands 182
+// #endif
 
 extern CommandStruct AGICommand[NumTotalAGICommands];  //all the other
 
